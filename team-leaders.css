@@ -1,0 +1,284 @@
+/*
+ * Component: Team Leaders (click-to-expand profile panel)
+ * Colors / fonts can be changed with the --tl-* variables on .tl
+ */
+.tl {
+  --tl-font-head: "Montserrat", Arial, sans-serif;
+  --tl-font-body: "Open Sans", Arial, sans-serif;
+  --tl-ink: #4a4a4a;
+  --tl-accent: #ff4d4f;
+  --tl-line: #3b3b3b;
+  --tl-panel: #f5f5f4;
+  background: #fff;
+  -webkit-text-size-adjust: 100%;
+  padding: clamp(40px, 7vw, 80px) max(clamp(16px, 4vw, 32px), env(safe-area-inset-right)) clamp(48px, 8vw, 96px) max(clamp(16px, 4vw, 32px), env(safe-area-inset-left));
+  font-family: var(--tl-font-body);
+}
+.tl__title {
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto clamp(36px, 6vw, 64px);
+  text-align: center;
+  padding-bottom: 14px;
+  border-bottom: 3px solid var(--tl-line);
+  font: 600 13px/1 var(--tl-font-head);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--tl-ink);
+}
+.tl__grid {
+  --tl-row-gap: clamp(36px, 5vw, 64px);
+  --tl-col-gap: clamp(16px, 3vw, 40px);
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--tl-row-gap) var(--tl-col-gap);
+  align-items: start;
+}
+.tl-card { text-align: center; }
+
+/* the whole image + name + role is one button */
+.tl-card__toggle {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+.tl-card__toggle { -webkit-tap-highlight-color: transparent; }
+.tl-card__toggle:focus-visible { outline: 2px solid var(--tl-accent); outline-offset: 6px; }
+
+/* image stack (span must be display:block or it collapses to 0 height) */
+.tl-card__img {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 4.2;
+  margin-bottom: 20px;
+  overflow: hidden;
+  background: #fff;
+}
+.tl-card__img img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  transition: transform .9s cubic-bezier(.2, .7, .2, 1), filter .6s;
+}
+/* "after" (sketch) spreads up from the bottom like ink on hover */
+.tl-card__img .tl-card__after {
+  z-index: 1;
+  transform: scale(1.1);
+  clip-path: circle(0% at 50% 100%);
+  transition: clip-path .9s cubic-bezier(.65, 0, .2, 1), transform .9s cubic-bezier(.2, .7, .2, 1);
+}
+/* Fallback: used only when no "after" image is set, so the hover effect still shows */
+.tl-card__img .tl-card__after.tl-demo { filter: grayscale(1) contrast(1.5) brightness(1.15); mix-blend-mode: multiply; }
+
+/* accent line that draws across the bottom */
+.tl-card__img::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  left: 0; right: 0; bottom: 0;
+  height: 3px;
+  background: var(--tl-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .6s cubic-bezier(.2, .7, .2, 1) .15s;
+}
+/* + badge (turns into x when open) */
+.tl-card__badge {
+  position: absolute;
+  z-index: 3;
+  right: 10px; bottom: 14px;
+  width: 32px; height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--tl-accent);
+  color: #fff;
+  font: 400 22px/1 Arial, sans-serif;
+  transform: scale(0) rotate(-90deg);
+  transition: transform .45s cubic-bezier(.3, 1.4, .5, 1) .1s;
+}
+
+/* hover / keyboard focus / open */
+.tl-card__toggle:focus-visible .tl-card__after,
+.tl-card.is-open .tl-card__after { clip-path: circle(150% at 50% 100%); transform: scale(1); }
+.tl-card__toggle:focus-visible .tl-card__before,
+.tl-card.is-open .tl-card__before { transform: scale(1.06); }
+.tl-card__toggle:focus-visible .tl-card__img::after,
+.tl-card.is-open .tl-card__img::after { transform: scaleX(1); }
+.tl-card__toggle:focus-visible .tl-card__badge { transform: scale(1) rotate(0); }
+.tl-card.is-open .tl-card__badge { transform: scale(1) rotate(45deg); }
+
+.tl-card__name {
+  display: inline-block;
+  margin: 0 0 6px;
+  padding-bottom: 3px;
+  font: 700 15px/1.2 var(--tl-font-head);
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  color: var(--tl-accent);
+  background: linear-gradient(currentColor, currentColor) left bottom / 0 2px no-repeat;
+  transition: background-size .45s cubic-bezier(.2, .7, .2, 1);
+}
+.tl-card__toggle:focus-visible .tl-card__name,
+.tl-card.is-open .tl-card__name { background-size: 100% 2px; }
+.tl-card__role { display: block; font-size: 13px; font-style: italic; color: var(--tl-ink); }
+
+/* touch screens have no hover: loop the reveal instead */
+@media (hover: none) {
+  .tl-card:not(.is-open) .tl-card__img .tl-card__after {
+    animation: tl-autoreveal 7s ease-in-out infinite;
+    animation-delay: calc(var(--i) * .4s);
+  }
+}
+@keyframes tl-autoreveal {
+  0%, 25%   { clip-path: circle(0% at 50% 100%); transform: scale(1.1); }
+  45%, 75%  { clip-path: circle(150% at 50% 100%); transform: scale(1); }
+  95%, 100% { clip-path: circle(0% at 50% 100%); transform: scale(1.1); }
+}
+
+/* ---------- slide-down panel ---------- */
+.tl-panel {
+  grid-column: 1 / -1;
+  margin-top: calc(var(--tl-row-gap) * -.55);
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows .45s cubic-bezier(.2, .7, .2, 1);
+}
+.tl-panel.open { grid-template-rows: 1fr; }
+.tl-panel__clip { position: relative; min-height: 0; overflow: hidden; padding-top: 14px; }
+/* little arrow pointing at the active leader */
+.tl-panel__clip::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: var(--tl-arrow-x, 50%);
+  margin-left: -14px;
+  border: 14px solid transparent;
+  border-top: 0;
+  border-bottom: 14px solid var(--tl-panel);
+}
+.tl-panel__box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 44px 32px 40px;
+  background: var(--tl-panel);
+}
+.tl-panel__box > div { display: flex; flex-direction: column; align-items: center; }
+.tl-panel__name {
+  margin: 0 0 6px;
+  font: 700 22px/1.2 var(--tl-font-head);
+  text-transform: uppercase;
+  color: var(--tl-accent);
+}
+.tl-panel__role { margin: 0; font-size: 14px; font-style: italic; color: var(--tl-ink); }
+.tl-panel__role::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 2px;
+  margin: 18px auto 20px;
+  background: var(--tl-accent);
+}
+.tl-panel__bio { margin: 0 auto 24px; max-width: 62ch; font-size: 15px; line-height: 1.75; color: #333; }
+.tl-panel__links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.tl-soc {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px 9px 12px;
+  border: 1.5px solid #cfcfcc;
+  border-radius: 999px;
+  background: #fff;
+  font: 600 13px/1 var(--tl-font-head);
+  color: var(--tl-ink);
+  text-decoration: none;
+  transition: background .2s, border-color .2s, color .2s;
+}
+.tl-soc svg { width: 16px; height: 16px; flex: none; }
+.tl-soc:hover, .tl-soc:focus-visible { background: var(--tl-accent); border-color: var(--tl-accent); color: #fff; outline: none; }
+.tl-panel__close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--tl-ink);
+  cursor: pointer;
+}
+.tl-panel__close:hover, .tl-panel__close:focus-visible { background: #e7e7e5; outline: none; }
+
+/* ---------- responsive ---------- */
+/* real hover only on devices that can hover (no sticky hover after a tap) */
+@media (hover: hover) {
+  .tl-card__toggle:hover .tl-card__after { clip-path: circle(150% at 50% 100%); transform: scale(1); }
+  .tl-card__toggle:hover .tl-card__before { transform: scale(1.06); }
+  .tl-card__toggle:hover .tl-card__img::after { transform: scaleX(1); }
+  .tl-card:not(.is-open) .tl-card__toggle:hover .tl-card__badge { transform: scale(1) rotate(0); }
+  .tl-card__toggle:hover .tl-card__name { background-size: 100% 2px; }
+}
+/* touch: always show the + so people know the card is tappable */
+@media (hover: none) {
+  .tl-card__badge { transform: scale(1) rotate(0); }
+}
+@media (pointer: coarse) {
+  .tl-soc { min-height: 44px; }
+  .tl-panel__close { width: 44px; height: 44px; top: 6px; right: 8px; }
+}
+
+/* large screens */
+@media (min-width: 1500px) {
+  .tl__grid { max-width: 1360px; }
+  .tl-card__name { font-size: 16px; }
+  .tl-card__role { font-size: 14px; }
+}
+/* tablets and below: 2 columns */
+@media (max-width: 899px) {
+  .tl__grid { grid-template-columns: repeat(2, 1fr); }
+  .tl-card__img { max-width: 360px; margin-inline: auto; margin-bottom: 16px; }
+  .tl-panel__box { padding: 40px 24px 32px; }
+}
+/* phones */
+@media (max-width: 480px) {
+  .tl-card__name { font-size: 12.5px; letter-spacing: .01em; }
+  .tl-card__role { font-size: 12px; }
+  .tl-panel__box { padding: 40px 16px 28px; }
+  .tl-panel__name { font-size: 18px; }
+  .tl-panel__role { font-size: 13px; }
+  .tl-panel__bio { font-size: 14px; line-height: 1.7; }
+  .tl-panel__links { gap: 8px; }
+  .tl-soc { padding: 10px 14px 10px 10px; font-size: 12px; }
+  .tl-card__badge { width: 28px; height: 28px; font-size: 20px; right: 8px; bottom: 12px; }
+}
+/* very small phones: single column */
+@media (max-width: 339px) {
+  .tl__grid { grid-template-columns: 1fr; }
+  .tl-card__img { max-width: 260px; }
+}
+/* short landscape phones */
+@media (max-height: 500px) and (orientation: landscape) {
+  .tl { padding-top: 32px; padding-bottom: 40px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tl-card__img img, .tl-card__img::after, .tl-card__badge, .tl-card__name, .tl-panel { transition: none; }
+  .tl-card .tl-card__img .tl-card__after { animation: none; }
+}
